@@ -1,0 +1,134 @@
+﻿<!--Group 4: Ashley Shaw-Strand & Gregory Schultz
+//ATTRIBUTIONS: librarymanagement.csv courtesy of Bimal Gajera via Kaggle Public Domain Dataset https://www.kaggle.com/datasets/bimalgajera/library-books?resource=download to initialize book catalogue
+
+@page "/"
+
+<!-- Styling ----------------------------------------------------------->
+
+<style>
+    body {
+        background-color: #000;
+        color: #FFF;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .top-bar {
+        background-color: #000;
+        padding: 10px 30px;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .brand-title {
+        font-size: 40px;
+        font-weight: bolder;
+        color: #2997FF;
+        margin: 0;
+        letter-spacing: 2px;
+        flex-shrink: 0;
+    }
+
+    nav {
+        display: flex;
+        flex: 1;
+        justify-content: flex-end;
+        gap: 40px;
+        margin-left: 40px;
+    }
+
+    .active-tab {
+        background-color: #000;
+        color: #FFF;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 24px;
+        font-size: 18px;
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s;
+        text-decoration: none; 
+    }
+
+    nav a {
+        color: #FFF;
+        text-decoration: none; 
+        font-size: 18px;
+        margin: 0;
+        padding: 8px 24px;
+        border-radius: 20px;
+        transition: background 0.2s;
+    }
+
+    nav a:hover, .active-tab:hover {
+        background-color: #2997FF; 
+        color: white;
+        text-decoration: none;
+    }
+
+    .main-container {
+        background-color: black;
+        color: white;
+        padding: 20px;
+        margin: 0 auto;
+        max-width: 600px;
+        min-height: 70vh; 
+        display: flex;
+        flex-direction: column;
+        justify-content: center; 
+        align-items: center;    
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 50px;
+    }
+
+    .main-button {
+        background-color: #2997FF;
+        color: white;
+        border: none;
+        font-weight: bold;       
+        border-radius: 36px;
+        padding: 16px 40px; 
+        margin: 0 24px;
+        font-size: 20px;    
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .main-button:hover {
+            background-color: #4DAAFF;
+        text-decoration: none;
+        color: white;
+        font-weight: bold;
+    }
+</style>
+
+<!--Home Page Structure----------------------------------------------------------------------->
+
+<div class="top-bar">
+    <h1 class="brand-title">Library Management Service</h1>
+
+    <!--Top Navigation Bar----------------------------------------------------->
+    <nav>
+        <NavLink href="/" class="active-tab">Home</NavLink>
+        <NavLink href="/customerhome" class="active-tab">Customer</NavLink>
+        <NavLink href="/rentals" class="active-tab">Rentals</NavLink>
+        <NavLink href="/books" class="active-tab">Books</NavLink>
+    </nav>
+</div>
+
+<!-- Page buttons that navigate to each page within the application------------>
+<div class="main-container">
+    <div class="button-container">
+        <NavLink href="/customerhome" class="main-button">Customer</NavLink>
+        <NavLink href="/rentals" class="main-button">Rentals</NavLink>
+        <NavLink href="/books" class="main-button">Books</NavLink>
+    </div>
+</div>

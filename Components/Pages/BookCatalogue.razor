@@ -1,0 +1,496 @@
+﻿<!--Group 4: Ashley Shaw-Strand & Gregory Schultz
+//ATTRIBUTIONS: librarymanagement.csv courtesy of Bimal Gajera via Kaggle Public Domain Dataset https://www.kaggle.com/datasets/bimalgajera/library-books?resource=download to initialize book catalogue
+
+
+@page "/BookCatalogue"
+@using LibraryManagement.Resources.Data
+@inject BookServices bookServices
+
+
+<!--Styling--------------------------------------------------------------->
+<style>
+    body {
+        background-color: #000;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .top-bar {
+        background-color: #000;
+        padding: 10px 30px;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .brand-title {
+        font-size: 40px;
+        font-weight: bold;
+        color: #2997FF;
+        margin: 0;
+        letter-spacing: 2px;
+        flex-shrink: 0;
+    }
+
+    .nav-bar {
+        display: flex;
+        flex: 1;
+        justify-content: flex-end;
+        gap: 40px;
+        margin-left: 40px;
+    }
+
+    nav a {
+        color: white;
+        text-decoration: none;
+        font-size: 18px;
+        margin: 0;
+        padding: 8px 24px;
+        border-radius: 20px;
+        transition: background 0.2s;
+    }
+
+        nav a:hover, .active-tab:hover {
+            background-color: #2997FF;
+            color: white;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background-color: #000;
+        color: white;
+        padding: 20px;
+        margin: 0 auto;
+        max-width: 1000px;
+    }
+
+    h3 {
+        font-size: 36px;
+        color: white;
+        margin: 100px 0 60px 0;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    form label {
+        font-weight: bold;
+        color: white;
+    }
+
+    form input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #2997FF;
+        color: white;
+    }
+
+        form input::placeholder,
+        form select::placeholder {
+            color: #DCDCDC;
+            opacity: 0.8;
+        }
+
+    form select,
+    .rental-input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #2997FF;
+        color: white;
+        font-size: 16px;
+    }
+
+        form select option[value=""] {
+            color: #DCDCDC;
+            opacity: 0.8;
+        }
+
+        .rental-input option[value=""] {
+            color: #DCDCDC !important;
+            opacity: 0.8 !important;
+        }
+
+        form select:focus,
+        .rental-input:focus {
+            outline: none;
+            border-color: #2997FF;
+            background-color: #4DAAFF;
+            color: white;
+        }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .main-button {
+        background-color: #2997FF;
+        color: white;
+        border: none;
+        font-weight: bold;
+        border-radius: 36px;
+        padding: 16px 40px;
+        margin: 0 24px;
+        font-size: 20px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+        .main-button:hover {
+            background-color: #4DAAFF;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+
+    .vertical-form .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .scrollable-table {
+        max-height: 400px;
+        overflow-y: auto;
+        margin: 30px auto 30px auto;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .styled-table {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(41,151,255,0.15);
+        margin: 0 auto;
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+    }
+
+        .styled-table th, .styled-table td {
+            padding: 16px 12px;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .styled-table th {
+            background-color: #2997FF;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+        }
+
+        .styled-table td {
+            color: #222;
+            background-color: #f8faff;
+            border: none;
+        }
+
+        .styled-table tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+            .styled-table tr:last-child {
+                border-bottom: none;
+            }
+
+    .scrollable-table::-webkit-scrollbar {
+        width: 12px;
+        background: #222;
+        border-radius: 8px;
+    }
+
+    .scrollable-table::-webkit-scrollbar-thumb {
+        background: #2997FF;
+        border-radius: 8px;
+    }
+
+        .scrollable-table::-webkit-scrollbar-thumb:hover {
+            background: #4DAAFF;
+        }
+
+    .scrollable-table {
+        scrollbar-color: #2997FF #222;
+        scrollbar-width: thin;
+    }
+
+    .styled-table .main-button {
+        background-color: #2997FF !important;
+        color: white;
+    }
+
+        .styled-table .main-button:hover {
+            background-color: #4DAAFF !important;
+            color: white;
+        }
+
+    .delete-button {
+        background-color: #2997FF;
+        color: white;
+        border: none;
+        font-weight: bold;
+        border-radius: 24px;
+        padding: 12px 30px;
+        margin: 0 24px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+        .delete-button:hover {
+            background-color: #4DAAFF;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .popup-content {
+        background: #222;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+        .popup-content h4 {
+            margin-top: 0;
+            color: #2997FF;
+        }
+
+        .popup-content p {
+            color: white;
+            margin: 15px 0;
+        }
+
+        .popup-content button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            background-color: #2997FF;
+            color: white;
+        }
+
+            .popup-content button:hover {
+                background: #4DAAFF;
+                color: white;
+            }
+
+    .confirmation-message {
+        color: red;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 20px;
+        font-size: 18px;
+    }
+</style>
+
+
+
+<!--Top Bar with Navigation-->
+<div class="top-bar">
+    <h1 class="brand-title">Library Management Service</h1>
+    <nav class="nav-bar">
+        <NavLink href="/">Home</NavLink>
+        <NavLink href="/customerhome">Customer</NavLink>
+        <NavLink href="/rentals">Rentals</NavLink>
+        <NavLink href="/books">Books</NavLink>
+    </nav>
+</div>
+
+
+<div class="main-container">
+    <h3>Book Catalogue</h3>
+
+    <!-- Search Form -->
+    <form class="vertical-form" @onsubmit="OnSearch">
+        <div class="form-group">
+            <label for="searchTitle">Title:</label>
+            <input type="text" id="searchTitle" @bind="searchTitle" placeholder="Search by title" />
+        </div>
+        <div class="form-group">
+            <label for="searchAuthor">Author:</label>
+            <input type="text" id="searchAuthor" @bind="searchAuthor" placeholder="Search by author" />
+        </div>
+        <div class="form-group">
+            <label for="searchCategory">Category:</label>
+            <input type="text" id="searchCategory" @bind="searchCategory" placeholder="Search by category" />
+        </div>
+        <div class="button-container">
+            <button type="submit" class="main-button">Search</button>
+            <button type="button" class="main-button" @onclick="ClearSearch">Clear</button>
+            <NavLink href="/addbooks" class="main-button">Add New Book</NavLink>
+        </div>
+    </form>
+
+    <div class="scrollable-table">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Category</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- loop through books fields-->
+                @foreach (var book in filteredBooks)
+                {
+                    <tr>
+                        <td>@book.BookId</td>
+                        <td>@book.Category</td>
+                        <td>@book.Title</td>
+                        <td>@book.Author</td>
+                        <td>
+                            <button class="main-button delete-button" @onclick="() => ShowDeletePopup(book.BookId)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    
+    <!--Popup confirm deletion-->
+    @if (showDeletePopup)
+    {
+        <div class="popup-overlay">
+            <div class="popup-content">
+                <h4>Confirm Delete</h4>
+                <p>Are you sure you want to delete book ID <strong>@deleteTargetId</strong>?</p>
+                <div class="button-container">
+                    <button class="main-button" @onclick="ConfirmDelete">Yes, Delete</button>
+                    <button class="main-button" @onclick="CancelDelete">Cancel</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Confirmation message -->
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p class="confirmation-message">@message</p>
+    }
+</div>
+
+@code{
+    // Injecting the BookServices to access book data
+    private List<Book> bookList = new List<Book>();
+    private List<Book> filteredBooks = new List<Book>();
+    private int deleteTargetId;
+    private bool showDeletePopup;
+    private string? message;
+
+    // Search fields
+    private string searchTitle = string.Empty;
+    private string searchAuthor = string.Empty;
+    private string searchCategory = string.Empty;
+
+    // OnInitializedAsync is called when the component is initialized
+    protected override async Task OnInitializedAsync()
+    {
+        bookList = await bookServices.GetAllBooksAsync();
+        filteredBooks = bookList;
+    }
+
+    // Filters the book list based on search title,author,category criteria
+    private void FilterBooks()
+    {
+        filteredBooks = bookList
+            .Where(b =>
+                (string.IsNullOrWhiteSpace(searchTitle) || b.Title.Contains(searchTitle, StringComparison.OrdinalIgnoreCase)) &&
+                (string.IsNullOrWhiteSpace(searchAuthor) || b.Author.Contains(searchAuthor, StringComparison.OrdinalIgnoreCase)) &&
+                (string.IsNullOrWhiteSpace(searchCategory) || b.Category.Contains(searchCategory, StringComparison.OrdinalIgnoreCase))
+            )
+            .ToList();
+    }
+
+    // Handles the search operation
+    private async Task OnSearch()
+    {
+        FilterBooks();
+        await Task.CompletedTask;
+    }
+
+    // Clears the search fields and resets the filtered book list
+    private void ClearSearch()
+    {
+        searchTitle = string.Empty;
+        searchAuthor = string.Empty;
+        searchCategory = string.Empty;
+        filteredBooks = bookList;
+    }
+
+    // Shows the delete confirmation popup
+    private void ShowDeletePopup(int bookId)
+    {
+        deleteTargetId = bookId;
+        showDeletePopup = true;
+    }
+
+    // Confirms the deletion of the book
+    private async Task ConfirmDelete()
+    {
+        showDeletePopup = false;
+        await DeleteBookAsync(deleteTargetId);
+    }
+
+    // Cancels the deletion and hides the popup
+    private void CancelDelete()
+    {
+        showDeletePopup = false;
+    }
+
+    // Deletes the item via service and reloads the list
+    private async Task DeleteBookAsync(int bookId)
+    {
+        try
+        {
+            await bookServices.DeleteBookAsync(bookId);
+            await LoadBooks();
+            message = $"Book ID {bookId} deleted successfully.";
+        }
+        catch (Exception ex)
+        {
+            message = $"Error deleting book: {ex.Message}";
+        }
+    }
+
+    // Loads all books from the service and applies the filter
+    private async Task LoadBooks()
+    {
+        bookList = await bookServices.GetAllBooksAsync();
+        FilterBooks();
+    }
+}

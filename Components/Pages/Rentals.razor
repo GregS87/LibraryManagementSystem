@@ -1,0 +1,374 @@
+﻿<!--Group 4: Ashley Shaw-Strand & Gregory Schultz
+//ATTRIBUTIONS: librarymanagement.csv courtesy of Bimal Gajera via Kaggle Public Domain Dataset https://www.kaggle.com/datasets/bimalgajera/library-books?resource=download to initialize book catalogue
+
+@page "/rentals"
+<!--This page utilizes code from the LibraryManagement/Resources/Data Folder-->
+@using LibraryManagement.Resources.Data
+<!--Using Code from the Books and RentalServices C# Class'-->
+@inject RentalServices RentalService
+@inject BookServices BookServices
+
+
+<!--Styling-->
+<style>
+    body {
+        background-color: #000;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .top-bar {
+        background-color: #000;
+        padding: 10px 30px;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .brand-title {
+        font-size: 40px;
+        font-weight: bold;
+        color: #2997FF;
+        margin: 0;
+        letter-spacing: 2px;
+        flex-shrink: 0;
+    }
+
+    .nav-bar {
+        display: flex;
+        flex: 1;
+        justify-content: flex-end;
+        gap: 40px;
+        margin-left: 40px;
+    }
+
+    .active-tab {
+        background-color: #000;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 24px;
+        font-size: 18px;
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+
+    nav a {
+        color: white;
+        text-decoration: none;
+        font-size: 18px;
+        margin: 0;
+        padding: 8px 24px;
+        border-radius: 20px;
+        transition: background 0.2s;
+    }
+
+        nav a:hover, .active-tab:hover {
+            background-color: #2997FF;
+            color: white;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background-color: #000;
+        color: black;
+        padding: 20px;
+        margin: 0 auto;
+        max-width: 600px;
+    }
+
+     h3 {
+        font-size: 36px;
+        color: white;
+        margin: 100px 0 60px 0;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    form label {
+        font-weight: bold;
+        color: black;
+    }
+
+    form input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #2997FF;
+        color: white;
+    }
+
+        form input::placeholder,
+        form select::placeholder,
+        input::placeholder,
+        select::placeholder {
+            color: #DCDCDC;
+            opacity: .8;
+        }
+
+    .button-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 32px ;
+        margin-top: 80px ;
+        margin-bottom: 80px ;
+        flex-wrap: nowrap;
+        width: 100%;
+    }
+
+    .main-button {
+        background-color: #2997FF;
+        color: white;
+        border: none;
+        font-weight: bold;
+        border-radius: 36px;
+        padding: 16px 40px;
+        margin: 0;
+        font-size: 20px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        min-width: 180px;
+        text-align: center;
+    }
+
+        .main-button:hover {
+            background-color: #4DAAFF;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+
+    .vertical-form {
+        margin-bottom: 60px;
+    }
+
+        .vertical-form .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+
+    .rental-details-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+        margin-top: 30px;
+        margin-bottom: 30px;
+        background-color: #000;
+        border-radius: 10px;
+        box-shadow: none;
+        overflow: hidden;
+    }
+
+        .rental-details-table th {
+            background-color: #2997FF;
+            color: white;
+            font-size: 16px;
+            border-radius: 10px 0 0 10px;
+            width: 40%;
+            text-align: right;
+            padding-right: 20px;
+            border: none;
+        }
+
+        .rental-details-table td {
+            background-color: #fff;
+            color: #222;
+            font-size: 15px;
+            border-radius: 0 10px 10px 0;
+            width: 60%;
+            text-align: left;
+            padding-left: 20px;
+            border: none;
+            font-weight: bold;
+        }
+
+    .equipment-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+
+        .equipment-table th {
+            background-color: #2997FF;
+            color: white;
+            font-size: 15px;
+            padding: 8px;
+            border: none;
+        }
+
+        .equipment-table td {
+            background-color: #000;
+            color: #222;
+            font-size: 14px;
+            padding: 8px;
+            border: none;
+        }
+
+    .book-id-cell {
+        color: #222;
+        font-size: 15px;
+        background-color: #fff;
+        border-radius: 0 10px 10px 0;
+        padding-left: 20px;
+        border: none;
+    }
+
+    .book-title-cell {
+        color: #2997FF;
+        font-size: 14px;
+        background-color: #fff;
+        border-radius: 0 10px 10px 0;
+        padding-left: 20px;
+        border: none;
+    }
+</style>
+
+<!--Top Bar with Navigation-->
+<div class="top-bar">
+    <h1 class="brand-title">Library Management Service</h1>
+    <nav class="nav-bar">
+        <NavLink href="/" class="active-tab">Home</NavLink>
+        <NavLink href="/customerhome" class="active-tab">Customer</NavLink>
+        <NavLink href="/rentals" class="active-tab">Rentals</NavLink>
+        <NavLink href="/books" class="active-tab">Books</NavLink>
+    </nav>
+</div>
+
+<!--Main Content-->
+
+<div class="main-container">
+    <h3>Rentals</h3>
+
+    <!--Rental Id section to submit known rental Id and reveal details in table-->
+    <form class="vertical-form" @onsubmit="OnSubmit">
+        <div class="form-group">
+            <label for="rentalId">Rental ID: </label>
+            <input type="text" id="rentalId" placeholder="Enter rental Id"
+                   @bind="rentalIdInput" />
+        </div>
+        <div class="button-container">
+            <!--reveal rental info-->
+            <button type="submit" class="main-button">View Rental Info</button>
+            <!--Add new rental items/rental-->
+            <NavLink href="/RentalItem" class="main-button">Add Rental Items</NavLink>
+        </div>
+    </form>
+
+    <!--If rental id exists, reveal the rental info related to that id-->
+    @if (rental != null)
+    {
+        <h3>Rental Details</h3>
+        <table class="rental-details-table">
+            <tr>
+                <th>Rental ID</th>
+                <td>@rental.rentalId</td>
+            </tr>
+            <tr>
+                <th>Customer ID</th>
+                <td>@rental.customerId</td>
+            </tr>
+            <tr>
+                <th>Customer Last Name</th>
+                <td>@rental.customerLastName</td>
+            </tr>
+            
+            <!--Check if rentalItems contains at least one item and reveals if it does, otherwise fallback message-->
+            @if (rentalItems != null && rentalItems.Count > 0)
+            {
+                <!--Loop through each item in the rentalItems list-->
+                @foreach (var item in rentalItems)
+                {
+                    <tr>
+                        <th>Book ID</th>
+                        <td class="book-id-cell">@item.BookId</td>
+                    </tr>
+                    <tr>
+                        <th>Book Title</th>
+                        <td class="book-title-cell">
+                            @bookNames.GetValueOrDefault(item.BookId, "Unknown")
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Rental Date</th>
+                        <td>@item.RentalDate.ToShortDateString()</td>
+                    </tr>
+                    <tr>
+                        <th>Return Date</th>
+                        <td>@item.ReturnDate.ToShortDateString()</td>
+                    </tr>
+                }
+            }
+            else if (rentalItems != null)
+            {
+                <tr>
+                    <th>Book Rented</th>
+                    <td>No books signed-out for this rental.</td>
+                </tr>
+            }
+        </table>
+    }
+    else if (showResult)
+    {
+        <p>No rental found for ID @rentalIdInput.</p>
+    }
+</div>
+
+<!--Start of C# code-->
+@code {
+    //stores user input
+    private string rentalIdInput = string.Empty;
+    //holds rental record retrieved from the database
+    private LibraryManagement.Resources.Data.Rental ?rental;
+    //stores list of items for the rental
+    private List<LibraryManagement.Resources.Data.RentalItem> ?rentalItems;
+    //dictionary to map book id to their book names
+    private Dictionary<int, string> bookNames = new();
+    //controls results section and set to false initially to hide results
+    private bool showResult = false;
+
+    //this method runs when user submits form and is async
+    private async Task OnSubmit()
+    {
+        //clears previous results before fetching data
+        showResult = false;
+        rental = null;
+        rentalItems = null;
+        bookNames.Clear();
+
+        //convert input string to integer, stores as rentalId
+        if (int.TryParse(rentalIdInput, out int rentalId))
+        {
+            //fetches rental record asynchronously using the parsed Id
+            rental = await RentalService.GetRentalByIdAsync(rentalId);
+            //asynchronously fetches list of items under that rental Id
+            rentalItems = await RentalService.GetRentalItemsAsync(rentalId);
+
+            //checks if any rental items were returned and loops through each item to fetch equip details
+            if (rentalItems != null)
+            {
+                foreach (var item in rentalItems)
+                {
+                    var book = await BookServices.GetBookByIdAsync(item.BookId);
+                    bookNames[item.BookId] = book?.Title ?? "Unknown";
+                }
+            }
+        }
+        //sets flag to true so UI knows to display the results
+        showResult = true;
+    }
+}

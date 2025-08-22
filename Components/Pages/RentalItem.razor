@@ -1,0 +1,686 @@
+﻿<!--Group 4: Ashley Shaw-Strand & Gregory Schultz
+//ATTRIBUTIONS: librarymanagement.csv courtesy of Bimal Gajera via Kaggle Public Domain Dataset https://www.kaggle.com/datasets/bimalgajera/library-books?resource=download to initialize book catalogue
+
+@page "/RentalItem"
+<!--This page utilizes code from the LibraryManagement/Resources/Data Folder-->
+@using LibraryManagement.Resources.Data
+<!--Using Code from the BookService, CustomerDataService and RentalServices C# Class'-->
+@inject BookServices BookServices
+@inject CustomerDataService CustomerDataService
+@inject RentalServices RentalService
+
+<!--Styling-->
+<style>
+    body {
+        background-color: #000;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .top-bar {
+        background-color: #000;
+        padding: 10px 30px;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .brand-title {
+        font-size: 40px;
+        font-weight: bold;
+        color: #2997FF;
+        margin: 0;
+        letter-spacing: 2px;
+        flex-shrink: 0;
+    }
+
+    .nav-bar {
+        display: flex;
+        flex: 1;
+        justify-content: flex-end;
+        gap: 40px;
+        margin-left: 40px;
+    }
+
+    nav a {
+        color: white;
+        text-decoration: none;
+        font-size: 18px;
+        margin: 0;
+        padding: 8px 24px;
+        border-radius: 20px;
+        transition: background 0.2s;
+    }
+
+    nav a:hover, .active-tab:hover {
+        background-color: #2997FF;
+        color: white;
+        text-decoration: none;
+    }
+
+    .main-flex-container {
+        display: flex;
+        gap: 40px;
+        align-items: flex-start;
+        justify-content: center;
+    }
+
+    .main-container {
+        background-color: #000;
+        color: white;
+        padding: 20px;
+        margin: 0;
+        max-width: 600px;
+        border-radius: 10px;
+        
+        flex: 1;
+    }
+
+    .form-shadow {
+        box-shadow: 0 2px 8px rgba(41, 151, 255, 0.15);
+        border-radius: 10px;
+        background-color: #000;
+        padding: 20px;
+    }
+
+    .table-container {
+        background-color: #000;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: none;
+        min-width: 400px;
+        flex: 1;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        background-color: #000;
+        color: white;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    th, td {
+        padding: 16px 12px;
+        text-align: center;
+        word-break: break-word;
+        border: none;
+    }
+
+    th {
+        background-color: #2997FF;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    td {
+        color: #222;
+        background-color: #f8faff;
+    }
+
+    tr {
+        border-bottom: 1px solid #ddd;
+    }
+
+    tr:last-child {
+        border-bottom: none;
+    }
+
+    .total-row td {
+        font-weight: bold;
+        background-color: #e6f2ff;
+    }
+
+    h1 {
+        font-size: 24px;
+        color: white;
+        margin: 0 0 10px 0;
+    }
+
+    h3 {
+        font-size: 36px;
+        color: white;
+        margin: 100px 0 60px 0;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .table-container h3 {
+        margin-bottom: 24px;
+    }
+
+    form label {
+        font-weight: bold;
+        color: white;
+    }
+
+    form input,
+    form select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #2997FF;
+        color: white;
+    }
+
+    form input::placeholder,
+    form select::placeholder,
+    input::placeholder,
+    select::placeholder {
+        color: #DCDCDC;
+        opacity: .8;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 50px;
+    }
+
+    .main-button {
+        background-color: #2997FF;
+        color: white;
+        border: none;
+        font-weight: bold;
+        border-radius: 36px;
+        padding: 16px 40px;
+        margin: 0 24px;
+        font-size: 20px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .main-button:hover {
+        background-color: #4DAAFF;
+        text-decoration: none;
+        color: white;
+        font-weight: bold;
+    }
+
+    .vertical-form .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .warning-popup {
+        background-color: #222;
+        color: #b30000;        
+        border: 1px solid #b30000;
+        border-radius: 12px;    
+        padding: 24px;          
+        margin-bottom: 20px;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 2px 16px rgba(41,151,255,0.15); 
+        font-size: 18px;        
+    }
+
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .popup-content {
+        background: #222;
+        color: white;
+        padding: 32px;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px rgba(41,151,255,0.15);
+        text-align: center;
+        min-width: 300px;
+        max-width: 500px;
+        
+    }
+
+    .popup-content.unavailable {
+        background: #222;
+        color: white;
+        padding: 32px;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px rgba(41,151,255,0.15);
+        text-align: center;
+        min-width: 300px;
+        max-width: 500px;
+        font-weight: bold;
+    }
+
+    .popup-content.unavailable h3 {
+        color: #b30000;
+        margin-top: 0;
+    }
+
+    .popup-content.unavailable p {
+        color: white;
+        margin: 15px 0;
+        font-weight: normal;
+    }
+
+    .popup-content.unavailable .button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .popup-content.unavailable .main-button {
+        background-color: #2997FF;
+        color: white;
+        border: none;
+        font-weight: bold;
+        border-radius: 36px;
+        padding: 16px 40px;
+        font-size: 20px;
+        cursor: pointer;
+        text-decoration: none;
+        width: auto;
+        margin: 0 auto;
+        display: block;
+    }
+
+    .popup-content.unavailable .main-button:hover {
+        background: #4DAAFF;
+        color: white;
+    }
+
+    .active-tab {
+        background-color: #000;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 24px;
+        font-size: 18px;
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+    .delete-button {
+        background-color: #2997FF;
+        color: white;
+        border: none;
+        font-weight: bold;
+        border-radius: 24px;
+        padding: 12px 30px;
+        margin: 0 24px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+   .delete-button:hover {
+            background-color: #4DAAFF;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+    .delete-btn {
+        background-color: #b30000;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        margin: 0 4px;
+    }
+    .delete-btn:hover {
+        background-color: #d32f2f;
+        color: white;
+    }
+</style>
+
+<!--Top Bar with Navigation-->
+
+<div class="top-bar">
+    <h1 class="brand-title">Library Management Service</h1>
+    <nav class="nav-bar">
+        <NavLink href="/" class="active-tab">Home</NavLink>
+        <NavLink href="/customerhome" class="active-tab">Customer</NavLink>
+        <NavLink href="/rentals" class="active-tab">Rentals</NavLink>
+        <NavLink href="/books" class="active-tab">Books</NavLink>
+    </nav>
+</div>
+
+
+
+<div class="main-flex-container">
+    <div class="main-container">
+        @if (isLoading)
+        {
+            <!--Message for if the page is loading-->
+            <p>Loading...</p>
+        }
+        else if (bookList.Count == 0 || customerList.Count == 0)
+        {
+
+            <!--Message if there is no book or customer list available-->
+
+            <p>No books or customers available. Please add data first.</p>
+        }
+        else
+        {
+            <h3>Add Rental Items</h3>
+
+
+            <!--Displays popup if the book has already been rented-->
+            @if (!string.IsNullOrEmpty(duplicateWarning))
+            {
+                <div class="warning-popup">
+                    @duplicateWarning
+                </div>
+            }
+
+            <!--Add Rental Items Form-->
+
+            <div class="form-shadow">
+                <form class="vertical-form" @onsubmit="AddRentalItemAsync">
+                    <div class="form-group">
+                        <label for="equipment">Book</label>
+                        <select id="equipment" class="rental-input" @onchange="OnBookChanged">
+                            <option value="">Select book</option>
+                            <!--Loops through equipment in equipmentList and displays id and name-->
+                            @foreach (var eq in bookList)
+                            {
+                                <option value="@eq.BookId">@eq.Title</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer">Customer</label>
+                        <select id="customer" class="rental-input" @bind="selectedCustomerId">
+                            <option value="0" disabled selected>Select customer</option>
+                            <!--Loops through customers in customerList and displays name-->
+                            @foreach (var cust in customerList)
+                            {
+                                <option value="@cust.CustomerId">@cust.FirstName @cust.LastName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="rentalDate">Rental Date</label>
+                        <input id="rentalDate" type="date" class="rental-input" @bind="rentalDate" />
+                    </div>
+                    <div class="form-group">
+                        <label for="returnDate">Return Date</label>
+                        <input id="returnDate" type="date" class="rental-input" @bind="returnDate" />
+                    </div>
+  
+
+                    <!--Submit button for adding the rental item, or cancel to navigate back to rentals page-->
+                    <div class="button-container">
+                        <button type="submit" class="main-button">Add Rental</button>
+                        <NavLink href="/rentals" class="main-button">Cancel</NavLink>
+                    </div>
+                </form>
+            </div>
+        }
+    </div>
+
+    <!--Table for Rental Details-->
+
+    <div class="table-container">
+        <h3>Rental Details</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Book ID</th>
+                    <th>Name</th>
+                    <th>Rental Date</th>
+                    <th>Return Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- loops through each item in the rentalitems, generating a table row with the respective table data-->
+                @foreach (var item in rentalItems)
+                {
+                    <tr>
+                        <td>@item.BookId</td>
+                        <td>@item.BookTitle</td>
+                        <td>@item.RentalDate.ToShortDateString()</td>
+                        <td>@item.ReturnDate.ToShortDateString()</td>
+                        <td>
+                                <!--Delete button the calls showdeletepopup with the books's title-->
+                                <button class="delete-button" @onclick="() => RemoveRentalItem(item)">Delete</button>
+                            </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>  
+            </tfoot>
+        </table>
+        <div class="button-container">
+            <!--confirm rental method and disabled if no rental items selected-->
+            <button class="main-button" @onclick="ConfirmRental" disabled="@(rentalItems.Count == 0)">Confirm Rental</button>
+        </div>
+    </div>
+</div>
+
+
+<!--if rental is successful, display the popup-->
+@if (!string.IsNullOrEmpty(rentalIdPopup))
+{
+    <div class="popup-overlay">
+        <div class="popup-content">
+            <h4>Rental Confirmed!</h4>
+            <p>Your Rental ID: <strong>@rentalIdPopup</strong></p>
+            <button class="main-button" @onclick="ClosePopup">Close</button>
+        </div>
+    </div>
+}
+
+
+<!--If equipment is unavailable, show this message-->
+@if (showUnavailablePopup)
+{
+    <div class="popup-overlay">
+        <div class="popup-content unavailable">
+            <h3>Book Unavailable</h3>
+            <p>@unavailableMessage</p>
+            <div class="button-container">
+                <button class="main-button" @onclick="CloseUnavailablePopup">Close</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!--Start of C# code for page-->
+@code {
+
+    //Field Inputs for Rental Item
+    //holds all books fetched from the database
+    private List<LibraryManagement.Resources.Data.Book> bookList = new();
+    //holds all customers fetched from the database
+    private List<Customer> customerList = new();
+    //stores the id of the book selected
+    private int selectedBookId;
+    //stores id of the customer selected
+    private int selectedCustomerId = 0;
+    //default rental period is set for today and return tomorrow
+    private DateTime rentalDate = DateTime.Today;
+    private DateTime returnDate = DateTime.Today.AddDays(1);
+    //indicates if data is still trying to load
+    private bool isLoading = true;
+    //stores warning message if the same book is added more than once
+    private string duplicateWarning = "";
+
+    //stores rental item added by user
+    private List<RentalItemViewModel> rentalItems = new();
+    //stores rental id to show in the confirmation popup
+    private string rentalIdPopup = "";
+    //controls visibility and content of popup when book is unavailable
+    private bool showUnavailablePopup = false;
+    private string unavailableMessage = "";
+
+
+    //called when component first starts up
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        //fetches books and customer data asynchronously
+        bookList = await BookServices.GetAllBooksAsync() ?? new();
+        customerList = await CustomerDataService.GetAllCustomersAsync() ?? new();
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    //When user selects a different book item
+    private void OnBookChanged(ChangeEventArgs e)
+    {
+        //tries to parse selected value as integer
+        if (int.TryParse(e.Value?.ToString(), out var id))
+        {
+            //updates book id
+            selectedBookId = id;
+        }
+        else
+        {
+            selectedBookId = 0;
+        }
+    }
+
+    //adds new rental item to the list
+    private async Task AddRentalItemAsync()
+    {
+        duplicateWarning = "";
+
+        if (selectedBookId == 0 || selectedCustomerId == 0)
+            return;
+
+        // Prevent rental dates before today
+        if (rentalDate < DateTime.Today)
+        {
+            duplicateWarning = "Rental date cannot be before today.";
+            StateHasChanged();
+            return;
+        }
+
+        var book = bookList.FirstOrDefault(bk => bk.BookId == selectedBookId);
+        if (book == null)
+            return;
+
+        // Check availability for selected dates before adding
+        bool available = await RentalService.IsBookAvailableAsync(selectedBookId, rentalDate, returnDate);
+
+        //popup if book is unavailable
+        if (!available)
+        {
+            unavailableMessage = $"Book '{book.Title}' is already rented for the selected dates.";
+            showUnavailablePopup = true;
+            StateHasChanged();
+            return;
+        }
+
+        //prevent duplicate entries in the rental list
+        if (rentalItems.Any(item => item.BookId == selectedBookId))
+        {
+            duplicateWarning = "This book is already added to your rental list.";
+            StateHasChanged();
+            return;
+        }
+
+        //add the item and refresh UI
+        rentalItems.Add(new RentalItemViewModel
+        {
+            BookId = book.BookId,
+            BookTitle = book.Title,
+            RentalDate = rentalDate,
+            ReturnDate = returnDate,
+        });
+
+        StateHasChanged();
+    }
+
+    //confirm the rental and send it to backend
+    private async Task ConfirmRental()
+    {
+        //gets selected customer
+        var customer = customerList.FirstOrDefault(c => c.CustomerId == selectedCustomerId);
+
+     
+        //create a rental record
+        var rental = new LibraryManagement.Resources.Data.Rental
+        {
+            customerId = selectedCustomerId,
+            customerLastName = customer?.LastName ?? "",
+            CreatedDate = DateTime.Now,
+            currentDate = DateTime.Now,
+            
+        };
+
+        //converts to data models to represent data user interacts with, bridge front and back end
+        var items = rentalItems.Select(i => new LibraryManagement.Resources.Data.RentalItem
+        {
+            BookId = i.BookId,
+            RentalDate = i.RentalDate,
+            ReturnDate = i.ReturnDate,
+            
+        }).ToList();
+
+        //sends rental to backend and shows confirmation
+        await RentalService.AddRentalAsync(rental, items);
+
+        rentalIdPopup = $"{rental.rentalId}";
+
+        // Clear rental items after confirmation
+        rentalItems.Clear();
+
+        StateHasChanged();
+    }
+
+    //closes the rental confirmation popup
+    private void ClosePopup()
+    {
+        rentalIdPopup = "";
+        StateHasChanged();
+    }
+
+    //closes equipment unavailable popup
+    private void CloseUnavailablePopup()
+    {
+        showUnavailablePopup = false;
+        unavailableMessage = "";
+        StateHasChanged();
+    }
+
+    //defines structure/properties for items shown in the rental list
+    public class RentalItemViewModel
+    {
+        public int BookId { get; set; }
+        public string? BookTitle { get; set; }
+        public DateTime RentalDate { get; set; }
+        public DateTime ReturnDate { get; set; }
+       
+    }
+
+    //Remove item from Rental Item Table
+    private void RemoveRentalItem(RentalItemViewModel item)
+    {
+        rentalItems.Remove(item);
+        StateHasChanged();
+    }
+}

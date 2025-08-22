@@ -1,0 +1,298 @@
+﻿<!--Group 4: Ashley Shaw-Strand & Gregory Schultz
+//ATTRIBUTIONS: librarymanagement.csv courtesy of Bimal Gajera via Kaggle Public Domain Dataset https://www.kaggle.com/datasets/bimalgajera/library-books?resource=download to initialize book catalogue
+
+
+<!--This page utilizes code from the LibraryManagement/Resources/Data Folder-->
+@using LibraryManagement.Resources.Data
+
+@page "/addcustomer"
+
+<!--Using Code from the CustomerDataService C# Class-->
+@inject CustomerDataService customerDataService
+
+
+<!--Styling--------------------------------------------------->
+<style>
+    body {
+        background-color: #000;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .top-bar {
+        background-color: #000;
+        padding: 10px 30px;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .brand-title {
+        font-size: 40px;
+        font-weight: bolder;
+        color: #2997FF;
+        margin: 0;
+        letter-spacing: 2px;
+        flex-shrink: 0;
+    }
+
+    nav {
+        display: flex;
+        flex: 1;
+        justify-content: flex-end;
+        gap: 40px;
+        margin-left: 40px;
+    }
+
+    .active-tab {
+        background-color: #000;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 24px;
+        font-size: 18px;
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+
+    nav a {
+        color: black;
+        text-decoration: none;
+        font-size: 18px;
+        margin: 0;
+        padding: 8px 24px;
+        border-radius: 20px;
+        transition: background 0.2s;
+    }
+
+        nav a:hover, .active-tab:hover {
+            background-color: #2997FF;
+            color: white;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background-color: #000;
+        color: white;           
+        padding: 20px;
+        margin: 0 auto;
+        max-width: 600px;
+    }
+
+    h3 {
+        font-size: 36px;
+        color: white;
+        margin: 100px 0 60px 0;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    form label {
+        font-weight: bold;
+        color: white;
+    }
+
+    form input, form select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #2997FF;
+        color: white;
+    }
+
+        form input::placeholder,
+        form select::placeholder,
+        input::placeholder,
+        select::placeholder {
+            color: #DCDCDC;
+            opacity: .8;
+        }
+
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 48px;
+        width: 100%;
+    }
+
+    .main-button {
+        background-color: #2997FF;
+        color: white;
+        border: none;
+        font-weight: bold;
+        border-radius: 20px;
+        padding: 10px 30px;
+        font-size: 16px;
+        margin: 0 24px;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        align-content: center;
+    }
+
+        .main-button:hover {
+            background-color: #4DAAFF;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+
+    .vertical-form .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .vertical-form{
+        margin-bottom:100px;
+    }
+
+    form label {
+        font-weight: normal;
+        color: white;
+    }
+
+    .status-label {
+        display: inline-block;
+        margin-right: 10px;
+        font-weight: bold;
+        color: black;
+    }
+
+    .confirmation-message {
+        color: red;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 20px;
+        font-size: 18px;
+    }
+</style>
+
+<!--Top Bar with Navigation-->
+
+<div class="top-bar">
+    <h1 class="brand-title">Library Management Service</h1>
+    <nav>
+        <NavLink href="/" class="active-tab">Home</NavLink>
+        <NavLink href="/customerhome" class="active-tab">Customer</NavLink>
+        <NavLink href="/rentals" class="active-tab">Rentals</NavLink>
+        <NavLink href="/equipment" class="active-tab">Books</NavLink>
+    </nav>
+</div>
+
+<!--Main Content of the Page-->
+<h3>Add Customer</h3>
+
+
+<!--HTML Form for the Customer input fields--------------------------------------------------------------------------->
+<div class="main-container">
+    <form class="vertical-form" @onsubmit="AddCustomer">
+        <div class="form-group">
+            <label for="FirstName">First Name:</label>
+            <input type="text" id="FirstName" @bind="firstName" placeholder="Enter first name" required />
+        </div>
+        <div class="form-group">
+            <label for="LastName">Last Name:</label>
+            <input type="text" id="LastName" @bind="lastName" placeholder="Enter last name" required />
+        </div>
+        <div class="form-group">
+            <label for="Email">Email:</label>
+            <input type="email" id="Email" @bind="email" placeholder="Enter email address" required />
+        </div>
+        <div class="form-group">
+            <label for="PhoneNumber">Phone Number:</label>
+            <input type="text" id="PhoneNumber" @bind="phoneNumber" placeholder="XXX-XXX-XXXX" required />
+        </div>
+
+    
+    <!--Submit button to confirm adding the customer and other navigation buttons-->
+    <div class="button-container">
+        <button type="submit" class="main-button">Confirm</button>
+        <NavLink href="/showexistingcustomer" class="main-button">Show Existing Customers</NavLink>
+        <NavLink href="/customerhome" class="main-button">Cancel</NavLink>
+    </div>
+   
+    </form>
+
+    <!--Message to display after adding the customer-->
+@if (!string.IsNullOrEmpty(message))
+{
+    <p class="confirmation-message">@message</p>
+}
+</div>
+
+
+
+<!--C# Code for the functionality of the AddCustomers Page-->
+@code {
+    //Fields for customer input data
+    private string firstName = string.Empty;
+    private string lastName = string.Empty;
+    private string email = string.Empty;
+    private string phoneNumber = string.Empty;
+    //stores status or error messages to display to the user
+    private string message = string.Empty;
+    //Initializes the customer list to hold all customers
+    private List<Customer> customerList = new List<Customer>();
+
+    //Loads all customers from the customer data service asynchronously
+    protected override async Task OnInitializedAsync()
+    {
+        //awaits the customer data service to get all customers before task completes
+        customerList = await customerDataService.GetAllCustomersAsync();
+    }
+
+    //Async method to add a new customer
+    private async Task AddCustomer()
+    {
+        try
+        {
+            //creates a new Customer object with the provided input data
+            var customer = new Customer
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                ContactPhone = phoneNumber
+            };
+
+            //Calls the AddCustomerAsync method from the customer data service to add and store the new customer
+            var result = await customerDataService.AddCustomerAsync(customer);
+
+            // Checks if the customer was added successfully then updates the message and customer list
+            // 1 means the customer was added successfully and didn't exist before
+            // 0 means the customer already exists
+            if (result > 0)
+            {
+                // Set success message for the UI
+                message = "Customer added successfully!";
+                // Refresh the customer list after adding a new customer
+                customerList = await customerDataService.GetAllCustomersAsync();
+                //Blazor method to re-render the component
+                StateHasChanged();
+                // Optionally clear form fields
+                firstName = lastName = email = phoneNumber = string.Empty;
+            }
+            // If the result is 0, it means the customer already exists
+            else
+            {
+                message = "Customer with this email already exists.";
+            }
+        }
+        // Catches any exceptions that occur during the process and sets the message to UI
+        catch (Exception ex)
+        {
+            message = $"Error adding customer: {ex.Message}";
+        }
+    }
+}

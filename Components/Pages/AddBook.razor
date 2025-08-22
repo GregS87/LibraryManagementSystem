@@ -1,0 +1,571 @@
+﻿<!--Group 4: Ashley Shaw-Strand & Gregory Schultz
+//ATTRIBUTIONS: librarymanagement.csv courtesy of Bimal Gajera via Kaggle Public Domain Dataset https://www.kaggle.com/datasets/bimalgajera/library-books?resource=download to initialize book catalogue
+-->
+
+<!--This page utilizes code from the LibraryManagement/Resources/Data Folder-->
+@using LibraryManagement.Resources.Data
+@using LibraryManagement.Services
+@inject BookServices bookServices
+
+<!-- This page is for adding new books to the library catalogue -->
+@page "/AddBooks"
+
+<!--Styling--------------------------------------------------------------->
+<style>
+    body {
+        background-color: #000;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .top-bar {
+        background-color: #000;
+        padding: 10px 30px;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .brand-title {
+        font-size: 40px;
+        font-weight: bold;
+        color: #2997FF;
+        margin: 0;
+        letter-spacing: 2px;
+        flex-shrink: 0;
+    }
+
+    .nav-bar {
+        display: flex;
+        flex: 1;
+        justify-content: flex-end;
+        gap: 40px;
+        margin-left: 40px;
+    }
+
+    nav a {
+        color: white;
+        text-decoration: none;
+        font-size: 18px;
+        margin: 0;
+        padding: 8px 24px;
+        border-radius: 20px;
+        transition: background 0.2s;
+    }
+
+        nav a:hover, .active-tab:hover {
+            background-color: #2997FF;
+            color: white;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background-color: #000;
+        color: white;
+        padding: 20px;
+        margin: 0 auto;
+        max-width: 1000px;
+    }
+
+    h3 {
+        font-size: 36px;
+        color: white;
+        margin: 100px 0 60px 0;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    form label {
+        font-weight: bold;
+        color: white;
+    }
+
+    form input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #2997FF;
+        color: white;
+    }
+
+        form input::placeholder,
+        form select::placeholder {
+            color: #DCDCDC;
+            opacity: 0.8;
+        }
+
+    form select,
+    .rental-input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #2997FF;
+        color: white;
+        font-size: 16px;
+    }
+
+        form select option[value=""] {
+            color: #DCDCDC;
+            opacity: 0.8;
+        }
+
+        .rental-input option[value=""] {
+            color: #DCDCDC !important;
+            opacity: 0.8 !important;
+        }
+
+        form select:focus,
+        .rental-input:focus {
+            outline: none;
+            border-color: #2997FF;
+            background-color: #4DAAFF;
+            color: white;
+        }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .main-button {
+        background-color: #2997FF;
+        color: white;
+        border: none;
+        font-weight: bold;
+        border-radius: 36px;
+        padding: 16px 40px;
+        margin: 0 24px;
+        font-size: 20px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+        .main-button:hover {
+            background-color: #4DAAFF;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+
+    .vertical-form .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .scrollable-table {
+        max-height: 900px;
+        overflow-y: auto;
+        margin: 30px auto 30px auto;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .styled-table {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(41,151,255,0.15);
+        margin: 0 auto;
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+    }
+
+        .styled-table th, .styled-table td {
+            padding: 16px 12px;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .styled-table th {
+            background-color: #2997FF;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+        }
+
+        .styled-table td {
+            color: #222;
+            background-color: #f8faff;
+            border: none;
+        }
+
+        .styled-table tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+            .styled-table tr:last-child {
+                border-bottom: none;
+            }
+
+    .scrollable-table::-webkit-scrollbar {
+        width: 12px;
+        background: #222;
+        border-radius: 8px;
+    }
+
+    .scrollable-table::-webkit-scrollbar-thumb {
+        background: #2997FF;
+        border-radius: 8px;
+    }
+
+        .scrollable-table::-webkit-scrollbar-thumb:hover {
+            background: #4DAAFF;
+        }
+
+    .scrollable-table {
+        scrollbar-color: #2997FF #222;
+        scrollbar-width: thin;
+    }
+
+    .styled-table .main-button {
+        background-color: #2997FF !important;
+        color: white;
+    }
+
+        .styled-table .main-button:hover {
+            background-color: #4DAAFF !important;
+            color: white;
+        }
+
+    .delete-button {
+        background-color: #2997FF;
+        color: white;
+        border: none;
+        font-weight: bold;
+        border-radius: 24px;
+        padding: 12px 30px;
+        margin: 0 24px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+        .delete-button:hover {
+            background-color: #4DAAFF;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .popup-content {
+        background: #222;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+        .popup-content h4 {
+            margin-top: 0;
+            color: #2997FF;
+        }
+
+        .popup-content p {
+            color: white;
+            margin: 15px 0;
+        }
+
+        .popup-content button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            background-color: #2997FF;
+            color: white;
+        }
+
+            .popup-content button:hover {
+                background: #4DAAFF;
+                color: white;
+            }
+
+    .confirmation-message {
+        color: red;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 20px;
+        font-size: 18px;
+    }
+</style>
+
+
+<!--Top Bar with Navigation-->
+<div class="top-bar">
+    <h1 class="brand-title">Library Management Service</h1>
+    <nav class="nav-bar">
+        <NavLink href="/">Home</NavLink>
+        <NavLink href="/customerhome">Customer</NavLink>
+        <NavLink href="/rentals">Rentals</NavLink>
+        <NavLink href="/books">Books</NavLink>
+    </nav>
+</div>
+
+
+<!--Main Content-->
+
+<h3>Add New Book</h3>
+
+<!--HTML Form for the Books input fields--------------------------------------------------------------------------->
+
+<div class="main-container">
+    <form class="vertical-form" @onsubmit="OnAddBook">
+        <div class="form-group">
+            <label for="id">ID:</label>
+            <input type="number" id="id" @bind="bookId" placeholder="Book ID" required readonly />
+        </div>
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <select id="category" class="rental-input" @bind="category" required>
+                <option value="">Select category</option>
+                <!--Looping through the categoryList to show the name of the category-->
+                @foreach (var cat in categoryList)
+                {
+                    <!--set value of the dropdown option to the category and display the name of category visibly-->
+                    <option value="@cat">@cat</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="name">Title:</label>
+            <input type="text" id="name" @bind="title" placeholder="Enter book title" required />
+        </div>
+        <div class="form-group">
+            <label for="author">Author:</label>
+            <input type="text" id="author" @bind="author" placeholder="Enter author name" required />
+        </div>
+        <div class="button-container">
+            <button type="submit" class="main-button">Add Book</button>
+            <NavLink href="/bookcatalogue" class="main-button">Search Books</NavLink>
+        </div>
+    </form>
+
+    <!--check if the message is not empty and displays the contents of a status or error-->
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p class="confirmation-message">@message</p>
+    }
+
+</div>
+
+<!--C# code for functionality of book page-->
+@code {
+    //Fields for form input and UI
+    private int? bookId = null;
+    private string category = string.Empty;
+    private string title = string.Empty;
+    private string author = string.Empty;
+    private string message = string.Empty;
+    //List to store all book items loaded
+    private List<LibraryManagement.Resources.Data.Book> bookList = new();
+    //List to store all categories
+    private List<string> categoryList = new();
+    private bool showDeletePopup = false;
+    //stores id of book for deletion purposes
+    private int deleteTargetId;
+
+
+    //Generates unique book id
+    private int GenerateSimilarBookId()
+    {
+        // Get all existing book id's and stores them in a set
+        var existingIds = bookList.Select(b => b.BookId).ToHashSet();
+
+        //random number generator and variable for new ID
+        var rand = new Random();
+        int newId;
+        int attempts = 0;
+        do
+        {
+            //generate a 3-digit ID like the others from the book csv and makes sure it's not already used
+            int hundreds = rand.Next(1, 10);
+            int tensUnits = rand.Next(0, 100);
+            newId = hundreds * 100 + tensUnits;
+            attempts++;
+        } while (existingIds.Contains(newId) && attempts < 1000);
+
+        // If all id's are taken.. go to the next highest available id number
+        if (existingIds.Contains(newId))
+            newId = existingIds.Max() + 1;
+
+        return newId;
+    }
+
+    //Runs when component first loads
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            //Sets the destination path for the book csv file
+            var destDir = Path.Combine(FileSystem.AppDataDirectory, "Resources", "Data");
+            if (!Directory.Exists(destDir))
+            {
+                Directory.CreateDirectory(destDir);
+            }
+
+            var sourcePath = Path.Combine(AppContext.BaseDirectory, "Resources", "Data", "librarymanagement.csv");
+            var destPath = Path.Combine(destDir, "librarymanagement.csv");
+
+            // Only copy if source exists and destination does not
+            if (!File.Exists(destPath) && File.Exists(sourcePath))
+            {
+                File.Copy(sourcePath, destPath);
+            }
+
+            // Only import if database is empty
+            var dbBooks = await bookServices.GetAllBooksAsync();
+            if (dbBooks.Count == 0 && File.Exists(destPath))
+            {
+                await bookServices.ImportBooksFromCsvAsync(destPath);
+                dbBooks = await bookServices.GetAllBooksAsync();
+            }
+
+            bookList = dbBooks ?? new List<LibraryManagement.Resources.Data.Book>();
+            await LoadCategories();
+            bookId = GenerateSimilarBookId();
+        }
+        catch (Exception ex)
+        {
+            message = $"Error initializing book: {ex.Message}";
+        }
+    }
+
+    //load all books from the service
+    private async Task LoadBooks()
+    {
+        try
+        {
+            //store result and clear any previous message
+            bookList = await bookServices.GetAllBooksAsync();
+            message = string.Empty;
+        }
+        //error message if loading fails
+        catch (Exception ex)
+        {
+            message = $"Error loading books: {ex.Message}";
+        }
+    }
+
+    //Loads category data from the book CSV file
+    private async Task LoadCategories()
+    {
+        var categoryPath = Path.Combine(FileSystem.AppDataDirectory, "librarymanagement.csv");
+        if (!File.Exists(categoryPath))
+        {
+            using var sourceStream = await FileSystem.OpenAppPackageFileAsync("Resources/Data/librarymanagement.csv");
+            using var destStream = File.Create(categoryPath);
+            await sourceStream.CopyToAsync(destStream);
+        }
+        var lines = await File.ReadAllLinesAsync(categoryPath);
+
+        // Extract unique category names from the book data
+        categoryList = lines
+            .Skip(1)
+            .Select(line => line.Split(','))
+            .Where(parts => parts.Length == 4)
+            .Select(parts => parts[3].Trim())
+            .Distinct()
+            .ToList();
+    }
+
+
+    //Adds a new book item
+    private async Task OnAddBook()
+    {
+        // Validation: Ensure all fields are filled
+        if (string.IsNullOrWhiteSpace(category) ||
+            string.IsNullOrWhiteSpace(title) ||
+            string.IsNullOrWhiteSpace(author) ||
+            bookId == null)
+        {
+            message = "Please fill in all fields before adding a book.";
+            return;
+        }
+
+        // Check for duplicate book titles (case-insensitive)
+        if (bookList.Any(b =>
+            b.Title.Equals(title.Trim(), StringComparison.OrdinalIgnoreCase) &&
+            b.Author.Equals(author.Trim(), StringComparison.OrdinalIgnoreCase)))
+        {
+            message = "A book with this title and author already exists in the catalogue.";
+            return;
+        }
+
+        // Try to add the new book and handle any errors
+        try
+        {
+            var book = new LibraryManagement.Resources.Data.Book
+            {
+                BookId = bookId ?? 0,
+                Category = category,
+                Title = title,
+                Author = author
+            };
+            await bookServices.AddBookAsync(book);
+
+            message = "Book added successfully!";
+            bookId = GenerateSimilarBookId();
+            category = string.Empty;
+            title = string.Empty;
+            author = string.Empty;
+            await LoadBooks();
+        }
+        catch (Exception ex)
+        {
+            message = $"Error adding book: {ex.Message}";
+        }
+    }
+
+    // Method to confirm deletion of a book
+    private async Task ConfirmDelete()
+    {
+        try
+        {
+            await bookServices.DeleteBookAsync(deleteTargetId);
+            message = $"Book ID {deleteTargetId} deleted successfully.";
+            showDeletePopup = false;
+            await LoadBooks();
+        }
+        catch (Exception ex)
+        {
+            message = $"Error deleting book: {ex.Message}";
+            showDeletePopup = false;
+        }
+    }
+
+    // Method to cancel deletion
+    private void CancelDelete()
+    {
+        showDeletePopup = false;
+    }
+
+}

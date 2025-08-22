@@ -1,0 +1,477 @@
+﻿<!--Group 4: Ashley Shaw-Strand & Gregory Schultz
+//ATTRIBUTIONS: librarymanagement.csv courtesy of Bimal Gajera via Kaggle Public Domain Dataset https://www.kaggle.com/datasets/bimalgajera/library-books?resource=download to initialize book catalogue
+
+@page "/showexistingcustomer"
+
+<!--This page utilizes code from the LibraryManagement/Resources/Data Folder-->
+@using LibraryManagement.Resources.Data
+
+<!--Using Code from the CustomerDataService C# Class-->
+@inject CustomerDataService customerDataService
+
+<!--Styling------------------------------------------->
+<style>
+    body {
+        background-color: #000;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .top-bar {
+        background-color: #000;
+        padding: 10px 30px;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .brand-title {
+        font-size: 40px;
+        font-weight: bold;
+        color: #2997FF;
+        margin: 0;
+        letter-spacing: 2px;
+        flex-shrink: 0;
+    }
+
+    .nav-bar {
+        display: flex;
+        flex: 1;
+        justify-content: flex-end;
+        gap: 40px;
+        margin-left: 40px;
+    }
+
+    .active-tab {
+        background-color: #000;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 24px;
+        font-size: 18px;
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+
+    nav a {
+        color: black;
+        text-decoration: none;
+        font-size: 18px;
+        margin: 0;
+        padding: 8px 24px;
+        border-radius: 20px;
+        transition: background 0.2s;
+    }
+
+        nav a:hover, .active-tab:hover {
+            background-color: #2997FF;
+            color: white;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background-color: #000;
+        color: white;           
+        padding: 20px;
+        margin: 0 auto;
+        max-width: 1200px;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    h3 {
+        font-size: 36px;
+        color: white;
+        margin: 100px 0 60px 0;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 40px;
+        margin-bottom: 60px;
+    }
+
+    .main-button {
+        background-color: #2997FF;
+        color: white;
+        border: none;
+        font-weight: bold;
+        border-radius: 36px;
+        padding: 16px 40px;
+        margin: 0 24px;
+        font-size: 20px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+        .main-button:hover {
+            background-color: #4DAAFF;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+
+
+    .delete-button {
+        background-color: #2997FF;
+        color: white;
+        border: none;
+        font-weight: bold;
+        border-radius: 24px;
+        padding: 12px 30px;
+        margin: 0 24px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+        .delete-button:hover {
+            background-color: #4DAAFF;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+
+
+
+    .scrollable-table {
+        max-height: 900px;
+        overflow-y: auto;
+        margin: 30px auto 30px auto;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .styled-table {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(41,151,255,0.15);
+        margin: 0 auto;
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+    }
+
+        .styled-table th, .styled-table td {
+            padding: 16px 12px;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .styled-table th {
+            background-color: #2997FF;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+        }
+
+        .styled-table td {
+            color: #222;
+            background-color: #f8faff;
+            border: none;
+        }
+
+        .styled-table tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+            .styled-table tr:last-child {
+                border-bottom: none;
+            }
+
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .popup-content {
+        background: #222;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+        .popup-content h4 {
+            margin-top: 0;
+            color: #2997FF;
+        }
+
+        .popup-content p {
+            color: white;
+            margin: 15px 0;
+        }
+
+        .popup-content .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .popup-content .main-button {
+            width: 100%;
+            padding: 12px;
+            margin: 0 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            background-color: #2997FF;
+            color: white;
+        }
+
+            .popup-content .main-button:hover {
+                background: #4DAAFF;
+                color: white;
+            }
+</style>
+
+<!--Top Bar with Navigation-->
+<div class="top-bar">
+    <h1 class="brand-title">Library Management Service</h1>
+    <nav class="nav-bar">
+        <NavLink href="/" class="active-tab">Home</NavLink>
+        <NavLink href="/customerhome" class="active-tab">Customer</NavLink>
+        <NavLink href="/rentals" class="active-tab">Rentals</NavLink>
+        <NavLink href="/books" class="active-tab">Books</NavLink>
+    </nav>
+</div>
+
+<!--Main Content-->
+
+<h3>Show Existing Customers</h3>
+
+
+
+<div class="main-container">
+
+    <!--If the error message contains text it will be shown here..-->
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p style="color:red">@errorMessage</p>
+        <p>Check Output window for import log and errors.</p>
+    }
+    else if (isLoading)
+    {
+        <p>Loading customers...</p>
+    }
+    else if (customers == null || customers.Count == 0)
+    {
+        <p>No customers found.</p>
+    }
+    else
+    {
+        
+        <div class="scrollable-table">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <!--Loops through each customer in the customer list and displays their details in respective rows-->
+                    @foreach (var customer in customers)
+                    {
+                        <tr>
+                            <td>@customer.CustomerId</td>
+                            <td>@customer.FirstName</td>
+                            <td>@customer.LastName</td>
+                            <td>@customer.Email</td>
+                            <td>@customer.ContactPhone</td>
+                            <td>
+                                <!--Delete button the calls showdeletepopup with the customer's id-->
+                                <button class="delete-button" @onclick="() => ShowDeletePopup(customer.CustomerId)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!--Renders a delete customer confirmation popup if a user clicks delete customer-->
+@if (showDeletePopup)
+{
+    <div class="popup-overlay">
+        <div class="popup-content">
+            <h4>Confirm Delete</h4>
+            <p>Are you sure you want to delete customer ID <strong>@deleteTargetId</strong>?</p>
+            <div class="button-container">
+                <button class="main-button" @onclick="ConfirmDelete">Yes, Delete</button>
+                <button class="main-button" @onclick="CancelDelete">Cancel</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!--Navigation to either add new customer or customer home page-->
+<div class="button-container">
+    <NavLink href="/addcustomer" class="main-button">Add New Customer</NavLink>
+    <NavLink href="/customerhome" class="main-button">Cancel</NavLink>
+</div>
+
+
+<!--C# code for functionality of equipment page-->
+@code {
+    private List<Customer> customers = new();
+    private string? errorMessage;
+    private bool showDeletePopup = false;
+    private int deleteTargetId;
+    private bool isLoading = true;
+
+    // This method is called when the component is initialized
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            // Ensure the destination directory exists before copying
+            var destDir = Path.Combine(FileSystem.AppDataDirectory, "Resources", "Data");
+            if (!Directory.Exists(destDir))
+            {
+                Directory.CreateDirectory(destDir);
+            }
+
+            var sourcePath = Path.Combine(AppContext.BaseDirectory, "Resources", "Data", "customer.csv");
+            var destPath = Path.Combine(destDir, "customer.csv");
+
+            // Only copy if source exists and destination does not
+            if (!File.Exists(destPath) && File.Exists(sourcePath))
+            {
+                File.Copy(sourcePath, destPath);
+            }
+
+            // Step 2: Import if database is empty
+            var dbCustomers = await customerDataService.GetAllCustomersAsync();
+            if (dbCustomers.Count == 0 && File.Exists(destPath))
+            {
+                await customerDataService.ImportCustomersFromCsvAsync(destPath);
+                dbCustomers = await customerDataService.GetAllCustomersAsync();
+            }
+
+            customers = dbCustomers ?? new List<Customer>();
+
+            // Step 3: If still empty, show debug info
+            if (customers.Count == 0)
+            {
+                errorMessage = $"No customers found. CSV exists: {File.Exists(destPath)}. CSV path: {destPath}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading customers: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    // This method loads all customers from the customerDataService
+    private async Task LoadCustomers()
+    {
+        try
+        {
+            // Call the service to get all customers asynchronously
+            var result = await customerDataService.GetAllCustomersAsync();
+            customers = result ?? new List<Customer>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading customers: {ex.Message}";
+        }
+        finally
+        {
+            // Ensure loading state is reset
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    //called when user clicks delete, shows popup, and stores the customer's Id
+    private void ShowDeletePopup(int customerId)
+    {
+        deleteTargetId = customerId;
+        showDeletePopup = true;
+    }
+
+    //hides the popup and calls deletecustomer method
+    private async Task ConfirmDelete()
+    {
+        showDeletePopup = false;
+        await DeleteCustomer(deleteTargetId);
+    }
+
+    //hides the popup without deleting anything
+    private void CancelDelete()
+    {
+        showDeletePopup = false;
+    }
+
+    //deletes the customer using the customerdataserice, reloads list if successful, otherwise error message
+    private async Task DeleteCustomer(int customerId)
+    {
+        try
+        {
+            await customerDataService.DeleteCustomerAsync(customerId);
+            await LoadCustomers();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error deleting customer: {ex.Message}";
+        }
+    }
+
+    // This method imports customers from a CSV file to initialize the database
+    private async Task ImportCustomers()
+    {
+        try
+        {
+            var sourcePath = Path.Combine(AppContext.BaseDirectory, "Resources", "Data", "customer.csv");
+            var destPath = Path.Combine(FileSystem.AppDataDirectory, "customer.csv");
+            if (!File.Exists(destPath) && File.Exists(sourcePath))
+            {
+                File.Copy(sourcePath, destPath);
+            }
+            await customerDataService.ImportCustomersFromCsvAsync(destPath);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error importing customers: {ex.Message}";
+        }
+    }
+}
+
+
